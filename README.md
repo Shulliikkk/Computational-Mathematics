@@ -1,1 +1,1 @@
-# Computational-mathematics-MIPT
+# Computational-mathematics
