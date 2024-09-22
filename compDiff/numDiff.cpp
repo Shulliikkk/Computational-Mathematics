@@ -12,8 +12,8 @@ struct System {
 
 template<typename T, unsigned int N>
 struct Derivative_coef {
-    T central_coef;
-    std::array<T, N> other_coefs{};
+  T central_coef;
+  std::array<T, N> other_coefs{};
 };
 
 template<std::size_t... Ints>
@@ -33,71 +33,71 @@ constexpr std::size_t fact() noexcept {
 
 template<typename T, std::size_t N>
 std::array<std::array<T, N - 1>, N - 1> minor(const std::array<std::array<T, N>, N>& matrix, const std::size_t i, const std::size_t j) noexcept {
-    std::array<std::array<T, N - 1>, N - 1> minor_res;
-    std::size_t row, col;
-    for (std::size_t k = 0; k < N; k++) {
-        for (std::size_t m = 0; m < N; m++) {
-            if (k == i || m == j) {
-                continue;
-            }
-            row = (k > i) ? k - 1 : k;
-            col = (m > j) ? m - 1 : m;
-            minor_res[row][col] = matrix[k][m];
-        }
+  std::array<std::array<T, N - 1>, N - 1> minor_res;
+  std::size_t row, col;
+  for (std::size_t k = 0; k < N; k++) {
+    for (std::size_t m = 0; m < N; m++) {
+      if (k == i || m == j) {
+        continue;
+      }
+      row = (k > i) ? k - 1 : k;
+      col = (m > j) ? m - 1 : m;
+      minor_res[row][col] = matrix[k][m];
     }
-    return minor_res;
+  }
+  return minor_res;
 }
 
 template<typename T, std::size_t N>
 T determinant(const std::array<std::array<T, N>, N>& matrix) noexcept {
-    T det_res = 0;
-    const std::size_t i = 0;
-    if constexpr (N == 1) {
-        return matrix[0][0];
+  T det_res = 0;
+  const std::size_t i = 0;
+  if constexpr (N == 1) {
+    return matrix[0][0];
+  }
+  else {
+    for (std::size_t j = 0; j < N; j++) {
+      det_res += ((i + j) % 2 == 0 ? 1 : -1) * matrix[i][j] * determinant<T, N - 1>(minor<T, N>(matrix, i, j));
     }
-    else {
-        for (std::size_t j = 0; j < N; j++) {
-            det_res += ((i + j) % 2 == 0 ? 1 : -1) * matrix[i][j] * determinant<T, N - 1>(minor<T, N>(matrix, i, j));
-        }
-    }
-    return det_res;
+  }
+  return det_res;
 }
 
 template<typename T, size_t N>
 T det_change_col(std::array<std::array<T, N>, N> matrix, const std::array<T, N>& col, const std::size_t j) noexcept {
-    for (std::size_t i = 0; i < N; i++) {
-        matrix[i][j] = col[i];
-    }
-    return determinant<T, N>(matrix);
+  for (std::size_t i = 0; i < N; i++) {
+    matrix[i][j] = col[i];
+  }
+  return determinant<T, N>(matrix);
 }
 
 template<typename T, std::size_t N, std::size_t L>
 System<T, N> create_system(std::array<T, N>& points) noexcept {
-    static_assert(N > L, "N must be greater than L");
-    System<T, N> system;
-    for (std::size_t j = 0; j < N + 1; j++) {
-      system.matrix[j][0] = (j == 0) ? 1 : 0;
+  static_assert(N > L, "N must be greater than L");
+  System<T, N> system;
+  for (std::size_t j = 0; j < N + 1; j++) {
+    system.matrix[j][0] = (j == 0) ? 1 : 0;
+  }
+  for (std::size_t i = 1; i < N + 1; i++) {
+  	for (std::size_t j = 0;  j < N + 1; j++) {
+      system.matrix[j][i] = std::pow(points[i - 1], j);
     }
-    for (std::size_t i = 1; i < N + 1; i++) {
-  		for (std::size_t j = 0;  j < N + 1; j++) {
-        system.matrix[j][i] = std::pow(points[i - 1], j);
-      }
-    }
-    system.col[L] = fact<L>();
-    return system;
+  }
+  system.col[L] = fact<L>();
+  return system;
 }
 
 template<typename T, std::size_t N>
 std::array<T, N> solve(const System<T, N>& system) {
-    std::array<T, N> res;
-    const T det = determinant<T, N + 1>(system.matrix);
-    if (det == 0) {
-        throw std::runtime_error("Determinant is zero");
-    }
-    for (std::size_t i = 0; i < N + 1; i++) {
-        res[i] = det_change_col<T, N + 1>(system.matrix, system.col, i) / det;
-    }
-    return res;
+  std::array<T, N> res;
+  const T det = determinant<T, N + 1>(system.matrix);
+  if (det == 0) {
+    throw std::runtime_error("Determinant is zero");
+  }
+  for (std::size_t i = 0; i < N + 1; i++) {
+    res[i] = det_change_col<T, N + 1>(system.matrix, system.col, i) / det;
+  }
+  return res;
 }
 
 template<typename T, std::size_t N, std::size_t L>
@@ -125,7 +125,6 @@ int main(){
     std::cout << derivative_coef.other_coefs[N - 1] << '}';
   }
   catch (const std::runtime_error& e) {
-
     std::cerr << "Eror: " << e.what() << std::endl;
   }
 }
