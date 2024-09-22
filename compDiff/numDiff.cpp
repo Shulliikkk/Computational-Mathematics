@@ -1,19 +1,13 @@
+#include <iostream>
+#include <utility>
 #include <array>
 #include <stdexcept>
-#include <utility>
 #include <cmath>
-#include <iostream>
 
 template<typename T, std::size_t N>
 struct System {
   std::array<std::array<T, N + 1>, N + 1> matrix{};
   std::array<T, N + 1> col{};
-};
-
-template<typename T, unsigned int N>
-struct Grid {
-  std::array<T, N> points{};
-  std::size_t central_point;
 };
 
 template<typename T, unsigned int N>
@@ -78,34 +72,15 @@ T det_change_col(std::array<std::array<T, N>, N> matrix, const std::array<T, N>&
 }
 
 template<typename T, std::size_t N, std::size_t L>
-System<T, N> create_system(Grid<T, N>& nodes) noexcept {
+System<T, N> create_system(std::array<T, N>& points) noexcept {
     static_assert(N > L, "N must be greater than L");
     System<T, N> system;
-    if (nodes.points[0] > 0) {
-      nodes.central_point = 0;
+    for (std::size_t j = 0; j < N + 1; j++) {
+      system.matrix[j][0] = (j == 0) ? 1 : 0;
     }
-    else if (nodes.points[N - 1] < 0) {
-      nodes.central_point = N;
-    }
-    else {
-      for (std::size_t i = 0; i < N - 1; i++) {
-        if (nodes.points[i] < 0 && nodes.points[i + 1] > 0) {
-          nodes.central_point = i + 1;
-          break;
-        }
-      }
-    }
-    for (std::size_t i = 0; i < N + 1; i++) {
+    for (std::size_t i = 1; i < N + 1; i++) {
   		for (std::size_t j = 0;  j < N + 1; j++) {
-        if (i < nodes.central_point) {
-          system.matrix[j][i] = std::pow(nodes.points[i], j);
-        }
-        else if (i == nodes.central_point) {
-          system.matrix[j][i] = (j == 0) ? 1 : 0;
-        }
-        else {
-          system.matrix[j][i] = std::pow(nodes.points[i - 1], j);
-        }
+        system.matrix[j][i] = std::pow(points[i - 1], j);
       }
     }
     system.col[L] = fact<L>();
@@ -119,28 +94,20 @@ std::array<T, N> solve(const System<T, N>& system) {
     if (det == 0) {
         throw std::runtime_error("Determinant is zero");
     }
-    for (std::size_t i = 0; i < N + 1; ++i) {
+    for (std::size_t i = 0; i < N + 1; i++) {
         res[i] = det_change_col<T, N + 1>(system.matrix, system.col, i) / det;
     }
     return res;
 }
 
 template<typename T, std::size_t N, std::size_t L>
-Derivative_coef<T, N> calc_derivative_coef(Grid<T, N>& nodes) {
+Derivative_coef<T, N> calc_derivative_coef(std::array<T, N> points) {
   Derivative_coef<T, N> derivative_coef;
-  System<T, N> system = create_system<T, N, L>(nodes);
+  System<T, N> system = create_system<T, N, L>(points);
   std::array<T, N> solution = solve<T, N>(system);
-  derivative_coef.central_coef = solution[nodes.central_point];
-  for (unsigned int i = 0; i < N + 1; i++) {
-    if (i < nodes.central_point) {
-      derivative_coef.other_coefs[i] = solution[i];
-    }
-    else if (i == nodes.central_point) {
-      derivative_coef.central_coef = solution[i];
-    }
-    else {
-      derivative_coef.other_coefs[i - 1] = solution[i];
-    }
+  derivative_coef.central_coef = solution[0];
+  for (unsigned int i = 0; i < N; i++) {
+    derivative_coef.other_coefs[i] = solution[i + 1];
   }
   return derivative_coef;
 }
@@ -148,9 +115,8 @@ Derivative_coef<T, N> calc_derivative_coef(Grid<T, N>& nodes) {
 int main(){
   try {
     const std::size_t N = 3, L = 2;
-    Grid<double, N> nodes;
-    nodes.points = std::array<double, N>{1, 2, 3};
-    Derivative_coef<double, N> derivative_coef = calc_derivative_coef<double, N, L>(nodes);
+    std::array<double, N> points = std::array<double, N>{1, 2, 3};
+    Derivative_coef<double, N> derivative_coef = calc_derivative_coef<double, N, L>(points);
     std::cout << "central_coef = " << derivative_coef.central_coef << std::endl;
     std::cout << "other_coefs = {";
     for (std::size_t i = 0; i < N - 1; i++) {
@@ -159,6 +125,7 @@ int main(){
     std::cout << derivative_coef.other_coefs[N - 1] << '}';
   }
   catch (const std::runtime_error& e) {
+
     std::cerr << "Eror: " << e.what() << std::endl;
   }
 }
