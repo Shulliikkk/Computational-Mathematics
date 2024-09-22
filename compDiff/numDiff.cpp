@@ -159,7 +159,6 @@ int main(){
     std::cout << derivative_coef.other_coefs[N - 1] << '}';
   }
   catch (const std::runtime_error& e) {
-
     std::cerr << "Eror: " << e.what() << std::endl;
   }
 }
