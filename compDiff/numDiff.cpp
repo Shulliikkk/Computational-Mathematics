@@ -79,8 +79,14 @@ System<T, N> create_system(std::array<T, N>& points) noexcept {
     system.matrix[j][0] = (j == 0) ? 1 : 0;
   }
   for (std::size_t i = 1; i < N + 1; i++) {
-  	for (std::size_t j = 0;  j < N + 1; j++) {
-      system.matrix[j][i] = std::pow(points[i - 1], j);
+    system.matrix[0][i] = 1;
+  }
+  for (std::size_t i = 1; i < N + 1; i++) {
+    system.matrix[1][i] = points[i - 1];
+  }
+  for (std::size_t i = 1; i < N + 1; i++) {
+  	for (std::size_t j = 2;  j < N + 1; j++) {
+      system.matrix[j][i] = points[i - 1] * system.matrix[j - 1][i]; 
     }
   }
   system.col[L] = fact<L>();
