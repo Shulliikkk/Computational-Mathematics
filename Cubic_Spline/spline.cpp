@@ -123,8 +123,8 @@ T f(T x) {
 
 int main() {
     const double start = 0.0;
-    const double end = 2.0;
-    const std::size_t M = 8, N_err = 30;
+    const double end = 10.0;
+    const std::size_t M = 6, N_err = 1000;
     const double x_0 = 1.5;
     std::size_t N = 5;
     double h, H, err;
@@ -140,15 +140,13 @@ int main() {
       }
 
       Cubic_Spline<double> spline(x, y);
-      Val[i] = spline.interpolate(x_0);
 
       err = 0;
-      H = (end - start) / N_err;
+      H = (end - 1 - start - 1) / N_err;
       for (std::size_t k = 0; k < N_err; k++) {
-        err = std::max(err, std::abs(f(start + k * H) - spline.interpolate(start + k * H)));
+        err = std::max(err, std::abs(f(start + 1 + k * H) - spline.interpolate(start + 1 + k * H)));
       }
       Err[i] = err;
-
       N *= 2;
     }
 
@@ -156,15 +154,5 @@ int main() {
     for (std::size_t i = 0; i < M; i++) {
       std::cout << Err[i] << ' ';
     }
-    std::cout << std::endl;
-
-    std::cout << "Interpolate values ";
-    for (std::size_t i = 0; i < M; i++) {
-      std::cout << Val[i] << ' ';
-    }
-    std::cout << std::endl;
-
-    std::cout << "Accure value " << f(x_0);
-
     return 0;
 }
