@@ -1,5 +1,6 @@
 #include <array>
 #include <iostream>
+#include <cmath>
 
 template<typename T_x, typename T_y, std::size_t N>
 class Hermit_Interpolator {
@@ -55,12 +56,49 @@ class Hermit_Interpolator {
     }
 };
 
+template<typename T>
+T func(T x) {
+    return exp(x);
+}
+
+template<typename T>
+T dfunc(T x) {
+    return exp(x);
+}
+
 int main() {
-  const std::size_t N = 3;
-  std::array<double, N> x{0, 1, 2};
-  std::array<double, N> f{1, 2, 33};
-  std::array<double, N> df{0, 5, 80};
-  const double x_0 = 2;
-  const Hermit_Interpolator<double, double, N> intrpolator(x, f, df);
-  std::cout << intrpolator.interpolate(x_0);
+  const std::size_t N = 5,  M = 6, N_err = 1000;
+  double H, err;
+
+  std::array<double, N> x{};
+  std::array<double, N> f{};
+  std::array<double, N> df{};
+  std::array<double, M> Err;
+
+  double start = 0.;
+  double end = 2.;
+  double h = (end - start) / 2.;
+  for (std::size_t i = 0; i < M; i++) {
+    for (std::size_t j = 0; j < N; j++) {
+      x[j] = start + j * h;
+      f[j] = func(x[j]);
+      df[j] = dfunc(x[j]);
+    }
+
+    const Hermit_Interpolator<double, double, N> interpolator(x, f, df);
+
+    err = 0;
+    H = (end - start) / N_err;
+    for (std::size_t k = 0; k < N_err; k++) {
+      err = std::max(err, std::abs(func(start + k * H) - interpolator.interpolate(start + k * H)));
+    }
+    Err[i] = err;
+    end /= 2;
+  }
+
+  std::cout << "Errors ";
+  for (std::size_t i = 0; i < M; i++) {
+    std::cout << Err[i] << ' ';
+  }
+  return 0;
 }
