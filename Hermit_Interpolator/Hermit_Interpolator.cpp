@@ -17,13 +17,15 @@ class Hermit_Interpolator {
         dvd_dif[2 * i] = f[i];
         dvd_dif[2 * i + 1] = f[i];
       }
-      return std::pair<std::array<T_x, 2 * N>, std::array<T_y, 2 * N>>(z, dvd_dif);
+      return {z, dvd_dif};
     }
   public:
     Hermit_Interpolator(const std::array<T_x, N> &x, const std::array<T_y, N>& f, const std::array<T_y, N>& df) noexcept {
       std::pair<std::array<T_x, 2 * N>,std::array<T_y, 2 * N>> strch = stretch(x, f);
       z = strch.first;
       dvd_dif = strch.second;
+      //auto [z, dvd_dif] = stretch(x, f);
+
       T_y t, dvd_dif_j_prev = dvd_dif[0];
       for (std::size_t j = 1; j < 2 * N; j++) {
         if (z[j] == z[j - 1]) {
@@ -58,17 +60,17 @@ class Hermit_Interpolator {
 
 template<typename T>
 T func(T x) {
-    return exp(x);
+    return x * sin(x);
 }
 
 template<typename T>
 T dfunc(T x) {
-    return exp(x);
+    return sin(x) + x * cos(x);
 }
 
 int main() {
-  const std::size_t N = 5,  M = 6, N_err = 1000;
-  double H, err;
+  const std::size_t N = 3,  M = 6, N_err = 1000;
+  double H, h, err;
 
   std::array<double, N> x{};
   std::array<double, N> f{};
@@ -77,8 +79,9 @@ int main() {
 
   double start = 0.;
   double end = 2.;
-  double h = (end - start) / 2.;
+
   for (std::size_t i = 0; i < M; i++) {
+    h = (end - start) / N;
     for (std::size_t j = 0; j < N; j++) {
       x[j] = start + j * h;
       f[j] = func(x[j]);
