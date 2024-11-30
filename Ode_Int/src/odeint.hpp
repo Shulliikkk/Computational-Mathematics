@@ -5,9 +5,11 @@
 #include <vector>
 #include <functional>
 #include <cmath>
+#include <typeinfo>
 
 struct DP45 {
   static constexpr std::size_t stages = 7;
+  static constexpr std::size_t order = 5;
   static constexpr std::array<std::array<double, stages>, stages> tabel{{{0, 0, 0, 0, 0, 0, 0},
                                                                            {1. / 5., 0, 0, 0, 0, 0, 0},
                                                                            {3. / 40., 9. / 40., 0, 0, 0, 0, 0},
@@ -22,6 +24,7 @@ struct DP45 {
 
 struct RKF45 {
   static constexpr std::size_t stages = 6;
+  static constexpr std::size_t order = 5;
   static constexpr std::array<std::array<double, stages>, stages> tabel{{{0, 0, 0, 0, 0, 0},
                                                                            {1. / 4., 0, 0, 0, 0, 0},
                                                                            {3. / 32., 9. / 32., 0, 0, 0, 0},
@@ -33,8 +36,24 @@ struct RKF45 {
   static constexpr std::array<double, stages> b_string_2{16. / 135., 0, 6656. / 12825., 28561. / 56430., -9. / 50., 2. / 55.};
 };
 
+struct RKCK45 {
+  static constexpr std::size_t stages = 6;
+  static constexpr std::size_t order = 5;
+  static constexpr std::array<std::array<double, stages>, stages> tabel{{{0, 0, 0, 0, 0, 0},
+                                                                           {1. / 5., 0, 0, 0, 0, 0},
+                                                                           {3. / 40., 9. / 40., 0, 0, 0, 0},
+                                                                           {3. / 10., -9. / 10., 6. / 5., 0, 0, 0},
+                                                                           {-11. / 54., 5. / 2., -70. / 27., 35. / 27., 0, 0},
+                                                                           {1631. / 55296., 175. / 512., 575. / 13824., 44275. / 110592., 253. / 4096., 0}}};
+  static constexpr std::array<double, stages> c_column{0, 1. / 5., 3. / 10., 3. / 5., 1., 7. / 8.};
+  static constexpr std::array<double, stages> b_string_1{37. / 378., 0, 250. / 621., 125. / 594., 0., 512. / 1771.};
+  static constexpr std::array<double, stages> b_string_2{2825. / 27648., 0, 18575. / 48384., 13525. / 55296., 277. / 14336., 1. / 4.};
+};
+
+
 struct BS23 {
   static constexpr std::size_t stages = 4;
+  static constexpr std::size_t order = 3;
   static constexpr std::array<std::array<double, stages>, stages> tabel{{{0, 0, 0, 0},
                                                                            {1. / 2., 0, 0},
                                                                            {0., 3. / 4., 0, 0},
@@ -63,6 +82,7 @@ std::vector<std::array<double, N>> odeint(const std::function<std::array<double,
 ) {
   static constexpr Butcher_Table BT;
   static constexpr std::size_t stages = BT.stages;
+  static constexpr std::size_t oreder_p_1 = BT.order + 1;
   double curr_time = 0, curr_h = init_h;
   std::array<double, N> curr_state, next_state_1, next_state_2, next_arg_k_j;;
   std::array<std::array<double, N>, stages> k, sum_l2j;
@@ -100,7 +120,7 @@ std::vector<std::array<double, N>> odeint(const std::function<std::array<double,
         next_state_2[m] = curr_state[m] + curr_h * sum_j2s_b_2[m];
       }
       error = norm_error(next_state_1, next_state_2);
-      curr_h *=  0.9 * std::pow(tolerance / error, 1. / 5.);
+      curr_h *=  0.9 * std::pow(tolerance / error, 1. / oreder_p_1);
       if (error <= tolerance) {
         break;
       }
