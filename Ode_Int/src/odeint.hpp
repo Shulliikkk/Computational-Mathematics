@@ -56,19 +56,22 @@ double norm_error(std::array<double, N>& next_state_1, std::array<double, N>& ne
 
 template<class Butcher_Table, std::size_t N>
 std::vector<std::array<double, N>> odeint(const std::function<std::array<double, N>(double, std::array<double, N>)> rhs,
-  std::array<double, N>& init_state,
+  const std::array<double, N>& init_state,
   const double end_time,
   const double init_h,
-  double tolerance
+  const double tolerance
 ) {
   static constexpr Butcher_Table BT;
   static constexpr std::size_t stages = BT.stages;
   double curr_time = 0, curr_h = init_h;
-  std::array<double, N> curr_state = init_state, next_state_1, next_state_2, next_arg_k_j;;
+  std::array<double, N> curr_state, next_state_1, next_state_2, next_arg_k_j;;
   std::array<std::array<double, N>, stages> k, sum_l2j;
   std::array<double, N> sum_j2s_b_1,  sum_j2s_b_2;
   std::vector<std::array<double, N>> solution;
   double error;
+  for (std::size_t i = 0; i < N; i++) {
+    curr_state[i] = init_state[i];
+  }
   while (curr_time <= end_time) {
     solution.push_back(curr_state);
     while(true) {
