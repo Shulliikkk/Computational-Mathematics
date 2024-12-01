@@ -5,7 +5,6 @@
 #include <vector>
 #include <functional>
 #include <cmath>
-#include <typeinfo>
 
 struct DP45 {
   static constexpr std::size_t stages = 7;
@@ -35,21 +34,6 @@ struct RKF45 {
   static constexpr std::array<double, stages> b_string_1{25. / 216., 0, 1408. / 2565., 2197. / 4104., -1. / 5., 0.};
   static constexpr std::array<double, stages> b_string_2{16. / 135., 0, 6656. / 12825., 28561. / 56430., -9. / 50., 2. / 55.};
 };
-
-struct RKCK45 {
-  static constexpr std::size_t stages = 6;
-  static constexpr std::size_t order = 5;
-  static constexpr std::array<std::array<double, stages>, stages> tabel{{{0, 0, 0, 0, 0, 0},
-                                                                           {1. / 5., 0, 0, 0, 0, 0},
-                                                                           {3. / 40., 9. / 40., 0, 0, 0, 0},
-                                                                           {3. / 10., -9. / 10., 6. / 5., 0, 0, 0},
-                                                                           {-11. / 54., 5. / 2., -70. / 27., 35. / 27., 0, 0},
-                                                                           {1631. / 55296., 175. / 512., 575. / 13824., 44275. / 110592., 253. / 4096., 0}}};
-  static constexpr std::array<double, stages> c_column{0, 1. / 5., 3. / 10., 3. / 5., 1., 7. / 8.};
-  static constexpr std::array<double, stages> b_string_1{37. / 378., 0, 250. / 621., 125. / 594., 0., 512. / 1771.};
-  static constexpr std::array<double, stages> b_string_2{2825. / 27648., 0, 18575. / 48384., 13525. / 55296., 277. / 14336., 1. / 4.};
-};
-
 
 struct BS23 {
   static constexpr std::size_t stages = 4;
