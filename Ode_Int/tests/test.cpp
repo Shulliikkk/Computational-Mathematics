@@ -1,16 +1,25 @@
 #include <array>
 #include <vector>
-#include <iostream>
+#include <fstream>
 #include <../src/odeint.hpp>
 
-std::array<double, 2> f(double t, std::array<double, 2> x) {
-  std::array<double, 2> rhs{x[1], - x[0]};
+std::array<double, 4> f(double t, std::array<double, 4> x) {
+  const double m = 0.012277471, M = 1 - m;
+  double R_1 = std::pow(((x[0] + m) * (x[0] + m) + x[2] * x[2]), 3. / 2.),
+         R_2 = std::pow(((x[0] - M) * (x[0] - M) + x[2] * x[2]), 3. / 2.);
+  std::array<double, 4> rhs{x[1],
+                            x[0] + 2 * x[3] - M * (x[0] + m) / R_1 - m * (x[0] - M) / R_2,
+                            x[3],
+                            x[2] - 2 * x[1] - M * x[2] / R_1 - m * x[2] / R_2};
   return rhs;
 }
 
 int main() {
-  std::array<double, 2> init_condition{0.0, 1.0};
-  std::vector<Point<std::array<double, 2>>> sol = odeint<2>(f, init_condition, 5., 0.0001, 1e-12);
-  std::cout << sol[sol.size() - 1].state[0] << std::endl;
-  std::cout << sol.size();
+  std::ofstream out("orbit.csv");
+  std::array<double, 4> init_condition{0.994, 0.0, 0.0, -2.031732629557337};
+  std::vector<Point<std::array<double, 4>>> sol = odeint<4>(f, init_condition, 11.124340337, 0.0001, 1e-15);
+  out << 'x' << ',' << 'y' << std::endl;
+  for (std::size_t i = 0; i < sol.size(); i++) {
+    out << sol[i].state[0] << ',' << sol[i].state[2] << std::endl;
+  }
 }
