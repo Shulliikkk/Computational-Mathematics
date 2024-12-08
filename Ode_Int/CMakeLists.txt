@@ -7,4 +7,9 @@ set(CMAKE_BUILD_TYPE Release)
 
 include_directories(src)
 
-add_executable(odeint tests/test.cpp)
+add_executable(odeint tests/orbit_arenstorf_test.cpp)
+#add_executable(odeint tests/oscilator_test.cpp)
+
+include_directories("eigen/")
+
+
