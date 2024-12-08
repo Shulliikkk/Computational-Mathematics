@@ -21,10 +21,10 @@ struct  BT_DP45 {
   static constexpr std::array<double, stages> b_string_2{5179. / 57600., 0, 7571. / 16695., 393. / 640., -92097. / 339200., 187. / 2100., 1. / 40.};
 };
 
-template<typename T>
+template<std::size_t N>
 struct Point {
   double time;
-  T state;
+  std::array<double, N> state;
 };
 
 template<std::size_t N>
@@ -38,7 +38,7 @@ double norm_error(const std::array<double, N>& next_state_1, const std::array<do
 }
 
 template<std::size_t N>
-  std::vector<Point<std::array<double, N>>> odeint(const std::function<std::array<double, N>(double, std::array<double, N>)> rhs,
+  std::vector<Point<N>> DP45(const std::function<std::array<double, N>(double, std::array<double, N>)> rhs,
   const std::array<double, N>& init_state,
   const double end_time,
   const double init_h,
@@ -49,11 +49,11 @@ template<std::size_t N>
   std::array<double, N> curr_state, next_state_1, next_state_2, next_arg_k_j;;
   std::array<std::array<double, N>, stages> k, sum_l2j;
   std::array<double, N> sum_j2s_b_1, sum_j2s_b_2;
-  std::vector<Point<std::array<double, N>>> solution;
+  std::vector<Point<N>> solution;
   for (std::size_t i = 0; i < N; i++) {
     curr_state[i] = init_state[i];
   }
-  solution.push_back(Point<std::array<double, N>>{curr_time, curr_state});
+  solution.push_back(Point<N>{curr_time, curr_state});
   while (curr_time < end_time) {
     //while(true) {
       // calc k_1, ..., k_j, ..., k_s-1
@@ -87,7 +87,7 @@ template<std::size_t N>
       else {
           curr_time += curr_h;
           curr_state = next_state_2;
-          solution.push_back(Point<std::array<double, N>>{curr_time, curr_state});
+          solution.push_back(Point<N>{curr_time, curr_state});
           curr_h *= 0.9 * std::pow(tolerance / error, 1. / oreder_p_1);
           if (curr_time + curr_h > end_time) {
             curr_h = end_time - curr_time;
