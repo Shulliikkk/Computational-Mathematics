@@ -1,15 +1,14 @@
 cmake_minimum_required(VERSION 3.14)
-project(ODEINT)
+project(BDF)
 
-set(CMAKE_CXX_STANDART 17)
+set(CMAKE_CXX_STANDART 20)
 set(CMAKE_CXX_FLAGS "-O2")
 set(CMAKE_BUILD_TYPE Release)
 
-include_directories(src)
+add_executable(bdf tests/order_test.cpp)
+#add_executable(bdf tests/orbit_J2_test.cpp)
 
-add_executable(odeint tests/orbit_arenstorf_test.cpp)
-#add_executable(odeint tests/oscilator_test.cpp)
-
-include_directories("eigen/")
+include_directories("src")
+include_directories("third_party/eigen/")
 
 
